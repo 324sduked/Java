@@ -7,7 +7,6 @@ import pl.library.library.entities.Book;
 import pl.library.library.repositories.BookRepository;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class BookService {
@@ -15,7 +14,6 @@ public class BookService {
     private final BookRepository bookRepository;
     private final BookDeletionServiceImpl bookDeletionService;
 
-    // Constructor injection for both BookRepository and BookDeletionService
     @Autowired
     public BookService(BookRepository bookRepository, BookDeletionServiceImpl bookDeletionService) {
         this.bookRepository = bookRepository;

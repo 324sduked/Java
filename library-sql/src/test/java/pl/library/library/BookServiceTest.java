@@ -51,4 +51,6 @@ public class BookServiceTest {
         Book foundBook = bookService.findById(book.getId());
         verifyBookProperties(foundBook);
     }
+    @Test
+    void CountBooksTest() {}
 }

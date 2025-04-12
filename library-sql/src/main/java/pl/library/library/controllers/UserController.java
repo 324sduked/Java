@@ -25,9 +25,9 @@ public class UserController {
     public List<User> GetAll() {
         return userService.GetAllUsers();
     }
-    @GetMapping("/{id}")
-    public User getUserById(@PathVariable long user_id) {
-        return userService.findById(user_id);
+    @GetMapping("/id/{id}")
+    public User getUserById(@PathVariable Long id) {
+        return userService.findById(id);
     }
     @GetMapping
     public User getUserByEmail(@RequestParam String email) {
