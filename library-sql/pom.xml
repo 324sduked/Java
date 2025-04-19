@@ -63,9 +63,25 @@
 			<version>3.4.3</version>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+			<version>2.15.2</version>
+		</dependency>
 
 
+		<dependency>
+			<groupId>com.google.cloud</groupId>
+			<artifactId>google-cloud-aiplatform</artifactId>
+			<version>3.30.0</version> <!--  Check for the latest version -->
+		</dependency>
 
+		<!-- Optional, but helpful for authentication with service accounts -->
+		<dependency>
+			<groupId>com.google.auth</groupId>
+			<artifactId>google-auth-library-oauth2-http</artifactId>
+			<version>1.20.0</version>  <!-- Check for the latest version -->
+		</dependency>
 
 	</dependencies>
 
