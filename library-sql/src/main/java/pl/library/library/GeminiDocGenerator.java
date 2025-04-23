@@ -34,15 +34,11 @@ public class GeminiDocGenerator {
         if (!Files.exists(DOCS_PATH)) {
             Files.createDirectory(DOCS_PATH);
         }
-
-        Files.walk(PROJECT_PATH)
+        Files.walk(PROJECT_PATH) // Code walk is what we need
                 .filter(path -> path.toString().endsWith(".java"))
-                .forEach(GeminiDocGenerator::processFile);
-
-        // Create the project summary prompt
+                .forEach(GeminiDocGenerator::processFile); // Code to use
 
         String projectSummaryPrompt = createProjectSummaryPrompt(classSummaries);
-        // Call the Gemini API to generate the project summary
         ObjectMapper mapper = new ObjectMapper();
         String escapedPrompt = mapper.writeValueAsString(projectSummaryPrompt);
 
