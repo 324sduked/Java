@@ -16,6 +16,8 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
+import static pl.library.library.FileProcessor.processFile;
+
 public class GeminiDocGenerator {
 
     private static final Logger logger = LoggerFactory.getLogger(GeminiDocGenerator.class);
@@ -26,6 +28,10 @@ public class GeminiDocGenerator {
     private static final List<String[]> classSummaries = new ArrayList<>();
 
     public static void main(String[] args) throws IOException {
+
+        GeminiHttpRequestHandler geminiHttpRequestHandler = new GeminiHttpRequestHandler(API_KEY, MODEL_URL);
+        FileProcessor fileProcessor = new FileProcessor();
+
         if (API_KEY == null || API_KEY.isEmpty()) {
             logger.error("API key not found in environment variables.");
             return;
@@ -34,52 +40,13 @@ public class GeminiDocGenerator {
         if (!Files.exists(DOCS_PATH)) {
             Files.createDirectory(DOCS_PATH);
         }
-        Files.walk(PROJECT_PATH) // Code walk is what we need
-                .filter(path -> path.toString().endsWith(".java"))
-                .forEach(GeminiDocGenerator::processFile); // Code to use
+
+        FileProcessor.fileWalk(PROJECT_PATH, filepPath -> { processFile(filepPath,DOCS_PATH, MODEL_URL); });
 
         String projectSummaryPrompt = createProjectSummaryPrompt(classSummaries);
         ObjectMapper mapper = new ObjectMapper();
-        String escapedPrompt = mapper.writeValueAsString(projectSummaryPrompt);
-
-        String requestBody = """
-        {
-          "contents": [
-            {
-              "parts": [
-                { "text": %s }
-              ]
-            }
-          ]
-        }
-        """.formatted(escapedPrompt);
-
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(MODEL_URL))
-                .header("Content-Type", "application/json")
-                .POST(HttpRequest.BodyPublishers.ofString(requestBody))
-                .build();
-
-        HttpClient client = HttpClient.newHttpClient();
-        HttpResponse<String> response;
-        try {
-            response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        } catch (InterruptedException e) {
-            logger.error("Thread interrupted while generating project summary", e);
-            Thread.currentThread().interrupt();
-            classSummaries.clear();
-            return; // Or handle the error as appropriate
-        }
-
-        if (response.statusCode() != 200) {
-            logger.error("Gemini API call failed for project summary: Status code = {}, Response body = {}", response.statusCode(), response.body());
-            classSummaries.clear();
-            return;
-        }
-
-        String result = response.body();
-        String projectSummary = extractSummaryFromGeminiResponse(result, mapper); // Extract the summary
-
+        String response = geminiHttpRequestHandler.sendHttpRequest(projectSummaryPrompt);
+        String projectSummary = geminiHttpRequestHandler.extractSummaryFromGeminiResponse(response, mapper); // Extract the summary
         // Write the project summary to a file
         Path summaryPath = DOCS_PATH.resolve("project_summary.md");
         Files.writeString(summaryPath, "# Project Summary\n\n" + projectSummary);
@@ -88,62 +55,6 @@ public class GeminiDocGenerator {
     }
 
 
-    private static void processFile(Path filePath) {
-        try {
-            String code = Files.readString(filePath);
-            String prompt = "Generate clear JavaDoc and a short summary for this Java class:\n\n" + code;
-
-            ObjectMapper mapper = new ObjectMapper();
-            String escapedPrompt = mapper.writeValueAsString(prompt);
-
-            String requestBody = """
-            {
-              "contents": [
-                {
-                  "parts": [
-                    { "text": %s }
-                  ]
-                }
-              ]
-            }
-            """.formatted(escapedPrompt);
-
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(MODEL_URL))
-                    .header("Content-Type", "application/json")
-                    .POST(HttpRequest.BodyPublishers.ofString(requestBody))
-                    .build();
-
-            HttpClient client = HttpClient.newHttpClient();
-
-            HttpResponse<String> response;
-
-            try {
-                response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            } catch (InterruptedException e) {
-                logger.error("❌ Failed to process " + filePath, e);
-                Thread.currentThread().interrupt();
-                return;
-            }
-
-            if (response.statusCode() != 200) {
-                logger.error("Gemini API call failed for {}: Status code = {}, Response body = {}", filePath, response.statusCode(), response.body());
-                return;
-            }
-
-            String result = response.body();
-            String markdownContent = convertToMarkdown(filePath, code, result, mapper);
-
-            String filename = filePath.getFileName().toString().replace(".java", ".md");
-            Path outputPath = DOCS_PATH.resolve(filename);
-            Files.writeString(outputPath, markdownContent);
-
-            logger.info("📄 Saved docs for: {}", filePath.getFileName());
-
-        } catch (IOException e) {
-            logger.error("❌ Failed to process " + filePath, e);
-        }
-    }
 
     private static String convertToMarkdown(Path filePath, String code, String geminiResponse, ObjectMapper mapper) {
         String className = filePath.getFileName().toString().replace(".java", "");
@@ -200,15 +111,6 @@ public class GeminiDocGenerator {
         return sb.toString();
     }
 
-    private static String extractSummaryFromGeminiResponse(String geminiResponse, ObjectMapper mapper) {
-        try {
-            JsonNode root = mapper.readTree(geminiResponse);
-            return root.get("candidates").get(0).get("content").get("parts").get(0).get("text").asText();
-        } catch (Exception e) {
-            logger.error("Error parsing Gemini response for project summary", e);
-            return "Error parsing Gemini response for project summary. Check the logs.";
-        }
 
-    }
 
 }
