@@ -14,12 +14,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.function.Consumer;
 
+import static java.nio.file.Files.walk;
+
 
 public class FileProcessor {
 
     private static final Logger logger = (Logger) LoggerFactory.getLogger(FileProcessor.class);
 
-    static MarkdownConverter markdownConverter = new MarkdownConverter();
+
 
     public static void processFile(Path filePath, Path docs_path, String model_url) {
         try {
@@ -65,7 +67,7 @@ public class FileProcessor {
             }
 
             String result = response.body();
-            String markdownContent = markdownConverter.convertToMarkdown(filePath, code, result, mapper);
+            String markdownContent = MarkdownConverter.convertToMarkdown(filePath, code, result, mapper);
 
             String filename = filePath.getFileName().toString().replace(".java", ".md");
             Path outputPath = docs_path.resolve(filename);
@@ -74,7 +76,7 @@ public class FileProcessor {
             logger.info("📄 Saved docs for: {}", filePath.getFileName());
 
         } catch (IOException e) {
-            logger.error("❌ Failed to process " + filePath, e);
+            logger.error("❌ Failed to process {}", filePath, e);
         }
 
 

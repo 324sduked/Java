@@ -65,8 +65,8 @@ import pl.library.library.repositories.BookRepository;
 import java.util.List;
 
 /**
- * Service class for managing books. Provides methods for saving, retrieving, deleting, and counting books.
- * Uses a {@link BookRepository} to interact with the database and a {@link BookDeletionServiceImpl} for handling book deletion.
+ * Service class for managing {@link Book} entities. Provides methods for saving, retrieving, deleting, and counting books.
+ * Uses {@link BookRepository} for data access and {@link BookDeletionServiceImpl} for handling book deletion.
  */
 @Service
 public class BookService {
@@ -75,9 +75,9 @@ public class BookService {
     private final BookDeletionServiceImpl bookDeletionService;
 
     /**
-     * Constructs a new BookService instance.
+     * Constructs a new {@link BookService} instance.
      * @param bookRepository The repository for accessing book data.
-     * @param bookDeletionService The service for handling book deletion.
+     * @param bookDeletionService The service for handling book deletion logic.
      */
     @Autowired
     public BookService(BookRepository bookRepository, BookDeletionServiceImpl bookDeletionService) {
@@ -93,7 +93,7 @@ public class BookService {
     public ResponseEntity<String> deleteBook(Long id) {return bookDeletionService.deleteBook(id);}
 
     /**
-     * Saves a book to the database.
+     * Saves a book to the repository.
      * @param book The book to save.
      * @return The saved book.
      */
@@ -111,12 +111,12 @@ public class BookService {
     }
 
     /**
-     * Retrieves all books from the database.
+     * Retrieves all books from the repository.
      * @return A list of all books.
      */
     public List<Book> findAll(){
         List<Book> books = bookRepository.findAll();
-        System.out.println("Books: " + books); //This line should ideally be removed for production code.  It's for debugging purposes only.
+        System.out.println("Books: " + books); //Consider removing this println for production code.  It's for debugging.
         return books;
     }
 
@@ -142,6 +142,6 @@ public class BookService {
 
 **Summary:**
 
-This service class provides a comprehensive interface for managing books within a library application.  It handles saving, retrieving (by ID and title), deleting, and counting books, delegating database interactions to a repository and utilizing a separate service for deletion handling.  The `findAll` method includes a debugging print statement that should be removed in a production environment.
+This Java class (`BookService`) provides a service layer for managing books in a library application.  It offers methods for creating, retrieving, updating (implicitly through `save`), deleting, and searching books by ID and title.  It leverages Spring's `@Service` annotation and utilizes a repository for data persistence.  The `deleteBook` method utilizes a separate service for more complex deletion logic.
 
 ---

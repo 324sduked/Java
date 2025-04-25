@@ -35,13 +35,13 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 /**
- * Main application class for the library application.
+ * Main application class for the library system.
  * This class bootstraps the Spring Boot application.
  */
 @SpringBootApplication
 public class Main {
 	/**
-	 * Main method to start the Spring Boot application.
+	 * Main method to run the Spring Boot application.
 	 * @param args Command line arguments.
 	 */
 	public static void main(String[] args) {
@@ -52,6 +52,6 @@ public class Main {
 
 **Summary:**
 
-This Java class, `Main`, serves as the entry point for the Spring Boot-based library application.  It uses the `@SpringBootApplication` annotation to enable auto-configuration and component scanning, simplifying the application setup. The `main` method initiates the Spring application context.
+This Java class, `Main`, serves as the entry point for the library management system.  It uses Spring Boot's `@SpringBootApplication` annotation to configure and launch the application.
 
 ---

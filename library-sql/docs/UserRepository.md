@@ -38,15 +38,15 @@ import java.util.List;
 
 /**
  * Spring Data JPA repository for managing {@link User} entities.
- * Provides methods for retrieving users by email, ID, and fetching all users.
+ * Provides methods for retrieving users by email, ID, and retrieving all users.
  */
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
 
     /**
-     * Finds a user by their email address.
-     * @param email The email address of the user to find.
-     * @return The user with the given email, or null if no such user exists.
+     * Retrieves a user by their email address.
+     * @param email The email address of the user to retrieve.
+     * @return The user with the matching email, or null if no user is found.
      */
     User findByEmail(String email);
 
@@ -57,9 +57,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
     List<User> findAll();
 
     /**
-     * Finds a user by their ID.
-     * @param user_id The ID of the user to find.
-     * @return The user with the given ID, or null if no such user exists.
+     * Retrieves a user by their ID.
+     * @param user_id The ID of the user to retrieve.
+     * @return The user with the matching ID, or null if no user is found.
      */
     User findById(long user_id);
 }
@@ -67,6 +67,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
 **Summary:**
 
-This Java interface `UserRepository` acts as a data access layer for managing `User` entities using Spring Data JPA.  It extends `JpaRepository` providing basic CRUD operations and additional methods to find users by email and ID.
+This Java interface `UserRepository` acts as a data access layer for managing `User` entities using Spring Data JPA. It inherits from `JpaRepository` and provides methods to find users by email and ID, as well as retrieve all users.
 
 ---

@@ -44,8 +44,8 @@ import org.springframework.stereotype.Service;
 import pl.library.library.repositories.BookRepository;
 
 /**
- * Service responsible for deleting books from the library database.
- * Uses Spring Data JPA's {@link BookRepository} to interact with the database.
+ * Service for deleting books from the library database.
+ * This service handles requests to delete books by ID.  It uses the {@link BookRepository} to interact with the database.
  */
 @Service
 public class BookDeletionServiceImpl implements BookDeletionService {
@@ -54,7 +54,7 @@ public class BookDeletionServiceImpl implements BookDeletionService {
 
     /**
      * Constructor for BookDeletionServiceImpl.
-     * @param bookRepository The repository used to access book data.  Autowired by Spring.
+     * @param bookRepository The repository used to access book data.
      */
     public BookDeletionServiceImpl(BookRepository bookRepository) {
         this.bookRepository = bookRepository;
@@ -77,8 +77,8 @@ public class BookDeletionServiceImpl implements BookDeletionService {
 }
 ```
 
-**Summary:**
+**Short Summary:**
 
-This service provides a method to delete books from the library database given their ID. It returns a Spring ResponseEntity indicating success or failure (book not found).  It uses dependency injection to access the `BookRepository` for database interaction.
+This service provides a method to delete books from the library database by ID.  It returns a HTTP 200 OK response if successful, and a 404 Not Found response if the book doesn't exist.
 
 ---

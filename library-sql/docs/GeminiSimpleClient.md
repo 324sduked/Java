@@ -64,18 +64,18 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
 /**
- * A simple command-line client for the Gemini AI model.  This class sends a request to the Gemini API to generate a summary of George Orwell's '1984'.
- *  Requires a valid Google AI Studio API key.  Replace the placeholder API key with your actual key.
+ * A simple command-line client for the Gemini API.  This class demonstrates a basic interaction
+ * with the Gemini language model to generate content.  Replace the placeholder API key with your
+ * actual Google AI Studio API key before running.
  */
 public class GeminiSimpleClient {
 
-    /**
-     *  The Google AI Studio API key.  **REPLACE THIS WITH YOUR ACTUAL API KEY.**
-     */
+    // Replace this with your actual API key from Google AI Studio
     private static final String API_KEY = "AIzaSyCHiFcEWIza6TOXGosGDSj8pawAfn1gBz0";
 
     /**
      * Main method to send a request to the Gemini API and print the response.
+     * The request asks the model to summarize George Orwell's '1984'.
      * @param args Command line arguments (not used).
      */
     public static void main(String[] args) {
@@ -117,6 +117,6 @@ public class GeminiSimpleClient {
 
 **Summary:**
 
-This Java class demonstrates a basic interaction with Google's Gemini language model. It sends a request to generate a summary of "1984" and prints the API's response to the console.  Remember to replace the placeholder API key with your own.
+This Java class provides a basic client for interacting with Google's Gemini language model.  It sends a request to generate a summary of "1984" and prints the API's response to the console.  Remember to replace the placeholder API key with your own.
 
 ---

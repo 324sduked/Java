@@ -49,7 +49,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * Represents a book in the library system.  This entity is mapped to the 'book' table in the database.
+ * Represents a book entity in the library system.
+ * This class maps to the 'book' table in the database.
  */
 @Setter
 @Getter
@@ -75,7 +76,7 @@ public class Book {
     private String author;
 
     /**
-     * The ISBN (International Standard Book Number) of the book.
+     * The ISBN of the book.
      */
     private String isbn;
 
@@ -87,7 +88,7 @@ public class Book {
     }
 
     /**
-     * Constructor to create a new Book object.
+     * Constructor for creating a new Book object.
      * @param id The ID of the book.
      * @param title The title of the book.
      * @param author The author of the book.
@@ -104,6 +105,6 @@ public class Book {
 
 **Summary:**
 
-The `Book` class represents a book entity in a library system. It stores the book's ID, title, author, and ISBN.  It uses JPA annotations for database persistence and Lombok annotations for automatic getter and setter generation.
+The `Book` class represents a book within a library system.  It includes attributes for ID, title, author, and ISBN, and is designed for persistence using JPA (Jakarta Persistence API).  Lombok's `@Getter` and `@Setter` annotations are used to automatically generate getters and setters.
 
 ---

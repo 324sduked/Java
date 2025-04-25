@@ -25,6 +25,8 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
+import static pl.library.library.FileProcessor.processFile;
+
 public class GeminiDocGenerator {
 
     private static final Logger logger = LoggerFactory.getLogger(GeminiDocGenerator.class);
@@ -35,6 +37,9 @@ public class GeminiDocGenerator {
     private static final List<String[]> classSummaries = new ArrayList<>();
 
     public static void main(String[] args) throws IOException {
+
+        GeminiHttpRequestHandler geminiHttpRequestHandler = new GeminiHttpRequestHandler(API_KEY, MODEL_URL);
+
         if (API_KEY == null || API_KEY.isEmpty()) {
             logger.error("API key not found in environment variables.");
             return;
@@ -43,52 +48,13 @@ public class GeminiDocGenerator {
         if (!Files.exists(DOCS_PATH)) {
             Files.createDirectory(DOCS_PATH);
         }
-        Files.walk(PROJECT_PATH) // Code walk is what we need
-                .filter(path -> path.toString().endsWith(".java"))
-                .forEach(GeminiDocGenerator::processFile); // Code to use
+
+        FileProcessor.fileWalk(PROJECT_PATH, filepPath -> { processFile(filepPath,DOCS_PATH, MODEL_URL); });
 
         String projectSummaryPrompt = createProjectSummaryPrompt(classSummaries);
         ObjectMapper mapper = new ObjectMapper();
-        String escapedPrompt = mapper.writeValueAsString(projectSummaryPrompt);
-
-        String requestBody = """
-        {
-          "contents": [
-            {
-              "parts": [
-                { "text": %s }
-              ]
-            }
-          ]
-        }
-        """.formatted(escapedPrompt);
-
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(MODEL_URL))
-                .header("Content-Type", "application/json")
-                .POST(HttpRequest.BodyPublishers.ofString(requestBody))
-                .build();
-
-        HttpClient client = HttpClient.newHttpClient();
-        HttpResponse<String> response;
-        try {
-            response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        } catch (InterruptedException e) {
-            logger.error("Thread interrupted while generating project summary", e);
-            Thread.currentThread().interrupt();
-            classSummaries.clear();
-            return; // Or handle the error as appropriate
-        }
-
-        if (response.statusCode() != 200) {
-            logger.error("Gemini API call failed for project summary: Status code = {}, Response body = {}", response.statusCode(), response.body());
-            classSummaries.clear();
-            return;
-        }
-
-        String result = response.body();
-        String projectSummary = extractSummaryFromGeminiResponse(result, mapper); // Extract the summary
-
+        String response = geminiHttpRequestHandler.sendHttpRequest(projectSummaryPrompt);
+        String projectSummary = geminiHttpRequestHandler.extractSummaryFromGeminiResponse(response, mapper); // Extract the summary
         // Write the project summary to a file
         Path summaryPath = DOCS_PATH.resolve("project_summary.md");
         Files.writeString(summaryPath, "# Project Summary\n\n" + projectSummary);
@@ -96,95 +62,6 @@ public class GeminiDocGenerator {
         classSummaries.clear();
     }
 
-
-    private static void processFile(Path filePath) {
-        try {
-            String code = Files.readString(filePath);
-            String prompt = "Generate clear JavaDoc and a short summary for this Java class:\n\n" + code;
-
-            ObjectMapper mapper = new ObjectMapper();
-            String escapedPrompt = mapper.writeValueAsString(prompt);
-
-            String requestBody = """
-            {
-              "contents": [
-                {
-                  "parts": [
-                    { "text": %s }
-                  ]
-                }
-              ]
-            }
-            """.formatted(escapedPrompt);
-
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(MODEL_URL))
-                    .header("Content-Type", "application/json")
-                    .POST(HttpRequest.BodyPublishers.ofString(requestBody))
-                    .build();
-
-            HttpClient client = HttpClient.newHttpClient();
-
-            HttpResponse<String> response;
-
-            try {
-                response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            } catch (InterruptedException e) {
-                logger.error("❌ Failed to process " + filePath, e);
-                Thread.currentThread().interrupt();
-                return;
-            }
-
-            if (response.statusCode() != 200) {
-                logger.error("Gemini API call failed for {}: Status code = {}, Response body = {}", filePath, response.statusCode(), response.body());
-                return;
-            }
-
-            String result = response.body();
-            String markdownContent = convertToMarkdown(filePath, code, result, mapper);
-
-            String filename = filePath.getFileName().toString().replace(".java", ".md");
-            Path outputPath = DOCS_PATH.resolve(filename);
-            Files.writeString(outputPath, markdownContent);
-
-            logger.info("📄 Saved docs for: {}", filePath.getFileName());
-
-        } catch (IOException e) {
-            logger.error("❌ Failed to process " + filePath, e);
-        }
-    }
-
-    private static String convertToMarkdown(Path filePath, String code, String geminiResponse, ObjectMapper mapper) {
-        String className = filePath.getFileName().toString().replace(".java", "");
-        String generatedText = "";
-
-        try {
-            JsonNode root = mapper.readTree(geminiResponse);
-            generatedText = root.get("candidates").get(0).get("content").get("parts").get(0).get("text").asText(); // Extract the generated text
-        } catch (Exception e) {
-            logger.error("Error parsing Gemini response", e);
-            generatedText = "Error parsing Gemini response. Check the logs.";
-        }
-
-        return """
-                # %s Class Documentation
-
-                ## Overview
-
-                %s
-
-                ## Java Code
-
-                ```java
-                %s
-                ```
-
-                ## Gemini Response
-
-                %s
-                ---
-                """.formatted(className, "This is an auto-generated documentation for class `" + className + "`.", code, generatedText);
-    }
 
     private static String createProjectSummaryPrompt(List<String[]> classSummaries) {
         StringBuilder sb = new StringBuilder();
@@ -209,16 +86,7 @@ public class GeminiDocGenerator {
         return sb.toString();
     }
 
-    private static String extractSummaryFromGeminiResponse(String geminiResponse, ObjectMapper mapper) {
-        try {
-            JsonNode root = mapper.readTree(geminiResponse);
-            return root.get("candidates").get(0).get("content").get("parts").get(0).get("text").asText();
-        } catch (Exception e) {
-            logger.error("Error parsing Gemini response for project summary", e);
-            return "Error parsing Gemini response for project summary. Check the logs.";
-        }
 
-    }
 
 }
 
@@ -245,10 +113,12 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
+import static pl.library.library.FileProcessor.processFile;
+
 /**
- * Generates documentation for Java classes using the Gemini API.  This tool iterates through Java files
- * in a specified project directory, sends each file's code to the Gemini API for documentation generation,
- * and saves the resulting documentation as Markdown files.  It also generates a project-level summary.
+ * Generates project documentation using the Gemini API. This class iterates through Java source files,
+ * extracts summaries for each class using a helper class, and then constructs a comprehensive project
+ * summary using the Gemini language model. The final summary and individual class summaries are saved to markdown files.
  */
 public class GeminiDocGenerator {
 
@@ -260,21 +130,31 @@ public class GeminiDocGenerator {
     private static final List<String[]> classSummaries = new ArrayList<>();
 
     /**
-     * Main method to generate documentation for all Java files in the project and a project summary.
-     * Requires the GEMINI_API_KEY environment variable to be set.
-     * @param args Command line arguments (currently unused).
-     * @throws IOException If an I/O error occurs during file processing.
+     * Main method to generate and save project documentation.  Requires a `GEMINI_API_KEY` environment variable.
+     * @param args Command line arguments (not used).
+     * @throws IOException If an I/O error occurs during file processing or writing.
      */
     public static void main(String[] args) throws IOException {
-        // ... (rest of the code remains the same)
+        // ... (Existing main method code) ...
     }
 
-    // ... (rest of the methods remain the same)
+
+    /**
+     * Creates a prompt for the Gemini API to generate a project summary based on individual class summaries.
+     * @param classSummaries A list of class summaries, where each element is a String array containing the class name and its overview.
+     * @return A string representing the prompt for the Gemini API.
+     */
+    private static String createProjectSummaryPrompt(List<String[]> classSummaries) {
+        // ... (Existing method code) ...
+    }
+
+
+
 }
 ```
 
 **Summary:**
 
-This Java class `GeminiDocGenerator` utilizes the Google Gemini API to automatically generate JavaDoc-style documentation and a project summary for a Java project. It processes all `.java` files within a specified directory, sends the code to Gemini for analysis, and saves the generated documentation and a consolidated project overview as Markdown files.  The API key is required as an environment variable.
+This Java class `GeminiDocGenerator` utilizes the Google Gemini API to automatically generate documentation for a Java project. It processes Java source files, extracts class summaries, and then uses the Gemini API to synthesize a comprehensive project overview.  The generated documentation is saved to markdown files.  An API key is required as an environment variable.
 
 ---

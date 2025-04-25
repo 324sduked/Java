@@ -1,3 +1,5 @@
+package org.example;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
@@ -7,31 +9,30 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public class GeminiSimpleClient {
 
     private static final Logger logger = LoggerFactory.getLogger(GeminiSimpleClient.class);
-    // Replace this with your actual API key from Google AI Studio
     private static final String API_KEY = "AIzaSyCHiFcEWIza6TOXGosGDSj8pawAfn1gBz0";
 
-    public static void main(String[] args) {
-        ObjectMapper mapper = new ObjectMapper();
+    public static String promptAndResponse(ObjectMapper mapper) {
         try {
             String endpoint = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + API_KEY;
-
             String requestBody = """
-                {
-                  "contents": [
                     {
-                      "parts": [
+                      "contents": [
                         {
-                          "text": "Write a summary of the book '1984' by George Orwell."
+                          "parts": [
+                            {
+                              "text": "hello :> "
+                            }
+                          ]
                         }
                       ]
                     }
-                  ]
-                }
-                """;
+                    """;
 
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(endpoint))
@@ -43,16 +44,17 @@ public class GeminiSimpleClient {
 
 
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            String generatedText = extractTextFromGeminiResponse(response.body(), mapper);
-            System.out.println("Response:");
-            System.out.println(generatedText);
+
+            return extractTextFromGeminiResponse(response.body(), mapper);
 
         } catch (Exception e) {
             e.printStackTrace();
+            return null;
         }
     }
 
-    private static String extractTextFromGeminiResponse(String geminiResponse, ObjectMapper mapper){
+
+    private static String extractTextFromGeminiResponse(String geminiResponse, ObjectMapper mapper) {
         String generatedText = "";
         try {
             JsonNode root = mapper.readTree(geminiResponse);

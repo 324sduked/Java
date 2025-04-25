@@ -53,7 +53,7 @@ import java.util.List;
 
 /**
  * Service class for managing users in the library system.
- * Provides methods for adding users, retrieving all users, finding users by email, and finding users by ID.
+ * Provides methods for adding, retrieving, and searching users.
  */
 @Service
 public class UserService {
@@ -62,35 +62,35 @@ public class UserService {
     private UserRepository userRepository;
 
     /**
-     * Adds a new user to the database.
+     * Adds a new user to the system.
      * @param user The user object to be added.
-     * @return The saved user object, including the generated ID.  Returns null if the save operation fails.
+     * @return The saved user object, including the generated ID.  Returns null if save fails.
      */
     public User addUser(User user) {
         return userRepository.save(user);
     }
 
     /**
-     * Retrieves all users from the database.
-     * @return A list of all users. Returns an empty list if no users are found.
+     * Retrieves a list of all users in the system.
+     * @return A list of all User objects. Returns an empty list if no users are found.
      */
     public List<User> GetAllUsers() {
         return userRepository.findAll();
     }
 
     /**
-     * Retrieves a user from the database by their email address.
+     * Retrieves a user by their email address.
      * @param email The email address of the user to be retrieved.
-     * @return The user object with the given email. Returns null if no user with the given email is found.
+     * @return The User object with the matching email. Returns null if no user is found.
      */
     public User findByEmail(String email) {
         return userRepository.findByEmail(email);
     }
 
     /**
-     * Retrieves a user from the database by their ID.
+     * Retrieves a user by their ID.
      * @param user_id The ID of the user to be retrieved.
-     * @return The user object with the given ID. Returns null if no user with the given ID is found.
+     * @return The User object with the matching ID. Returns null if no user is found.
      */
     public User findById(Long user_id) {
         return userRepository.findById(user_id).orElse(null);
@@ -101,6 +101,6 @@ public class UserService {
 
 **Summary:**
 
-This `UserService` class provides a service layer for managing user data in a library application.  It utilizes Spring Data JPA for database interaction, offering methods to add new users, retrieve all users, and find users by email or ID.  It simplifies user management for other parts of the application.
+The `UserService` class provides a service layer for managing user data within the library application. It offers methods to add new users, retrieve all users, find users by email, and find users by ID, interacting with the underlying `UserRepository` for data persistence.
 
 ---

@@ -50,9 +50,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * Represents a user in the library system.  This entity holds basic user information.
- *
- * @author [Your Name]
+ * Represents a user in the library system.  This entity stores user information such as first name, last name, and email.
  */
 @Setter
 @Getter
@@ -60,27 +58,26 @@ import lombok.Setter;
 @Table(name = "user")
 public class User {
     /**
-     * The unique identifier for the user.
+     * The unique identifier for the user.  Generated automatically by the database.
      */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long user_id;
-
     /**
      * The user's first name.
      */
     private String first_name;
-
     /**
      * The user's last name.
      */
     private String last_name;
-
     /**
      * The user's email address.
      */
     private String email;
 
+//    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+//    private List<Book> books;
 
     /**
      * Default constructor for JPA.
@@ -89,7 +86,7 @@ public class User {
     }
 
     /**
-     * Creates a new User object.
+     * Constructor to create a new User object.
      * @param first_name The user's first name.
      * @param last_name The user's last name.
      * @param email The user's email address.
@@ -102,8 +99,8 @@ public class User {
 }
 ```
 
-**Short Summary:**
+**Summary:**
 
-This Java class `User` represents a user in a library system. It stores the user's ID, first name, last name, and email address.  It's designed for use with JPA (Jakarta Persistence API) for database interaction.  The commented-out `@OneToMany` relationship suggests potential future expansion to link users with borrowed books.
+This Java class `User` represents a user entity for a library system. It stores basic user information like first name, last name, and email, and uses JPA annotations for persistence in a database.  The commented-out `@OneToMany` relationship suggests a potential future extension to track books borrowed by the user.
 
 ---

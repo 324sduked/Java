@@ -72,8 +72,7 @@ import pl.library.library.entities.Book;
 import java.util.List;
 
 /**
- * REST controller for managing books in the library system.
- * Provides endpoints for adding, deleting, retrieving, and searching books.
+ * REST controller for managing books.  Provides endpoints for adding, deleting, retrieving, and querying books.
  */
 @RestController
 @RequestMapping("/books")
@@ -83,15 +82,15 @@ public class BookController {
 
     /**
      * Constructs a BookController with the given BookService.
-     * @param bookService The service used for book operations.
+     * @param bookService The service to use for book operations.
      */
     public BookController(BookService bookService) {
         this.bookService = bookService;
     }
 
     /**
-     * A test endpoint.  Should be removed in production.
-     * @return The integer value 1.
+     * A test endpoint, returning 1.  For testing purposes only.
+     * @return 1
      */
     @GetMapping("/test")
     public int test(){
@@ -100,7 +99,7 @@ public class BookController {
 
     /**
      * Adds a new book to the library.
-     * @param book The book to be added.
+     * @param book The book to add.
      * @return The added book.
      */
     @PostMapping("/add")
@@ -109,8 +108,8 @@ public class BookController {
     }
 
     /**
-     * Deletes a book from the library by its ID.
-     * @param id The ID of the book to be deleted.
+     * Deletes a book by its ID.
+     * @param id The ID of the book to delete.
      * @return A ResponseEntity indicating success or failure.
      */
     @DeleteMapping("/delete/{id}")
@@ -118,8 +117,9 @@ public class BookController {
        return bookService.deleteBook(id);
     }
 
+
     /**
-     * Retrieves all books from the library.
+     * Retrieves all books in the library.
      * @return A list of all books.
      */
     @GetMapping("/all")
@@ -129,7 +129,7 @@ public class BookController {
 
     /**
      * Retrieves a book by its ID.
-     * @param id The ID of the book to be retrieved.
+     * @param id The ID of the book to retrieve.
      * @return The book with the given ID.
      */
     @GetMapping("/id/{id}")
@@ -138,7 +138,7 @@ public class BookController {
     }
 
     /**
-     * Counts the number of books with the given title.
+     * Counts the number of books with a given title.
      * @param title The title to search for.
      * @return The number of books with the given title.
      */
@@ -159,6 +159,6 @@ public class BookController {
 
 **Summary:**
 
-This Java class acts as a REST controller for managing books within a library application.  It provides endpoints to add, delete, retrieve individual books by ID, retrieve all books, count books by title, and find a book by title.  It uses a `BookService` to handle the underlying business logic.  The `/test` endpoint is for testing purposes and should be removed in production.
+This Java class `BookController` acts as a REST controller for managing books within a library application. It offers endpoints to add, delete, retrieve individual books, retrieve all books, count books by title, and find books by title.  It utilizes a `BookService` for underlying data operations.  A test endpoint is also included.
 
 ---
